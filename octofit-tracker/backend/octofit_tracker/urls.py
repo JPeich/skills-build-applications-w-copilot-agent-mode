@@ -18,8 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+
 from . import views
 import os
+from django.views.generic import RedirectView
 
 router = DefaultRouter()
 router.register(r'users', views.UserViewSet, basename='user')
@@ -28,19 +30,8 @@ router.register(r'activities', views.ActivityViewSet, basename='activity')
 router.register(r'leaderboard', views.LeaderboardViewSet, basename='leaderboard')
 router.register(r'workouts', views.WorkoutViewSet, basename='workout')
 
-def api_root(request, format=None):
-    CODESPACE_NAME = os.environ.get('CODESPACE_NAME', '')
-    base_url = f"https://{CODESPACE_NAME}-8000.app.github.dev/api" if CODESPACE_NAME else request.build_absolute_uri('/api')[:-1]
-    return views.Response({
-        'users': f'{base_url}/users/',
-        'teams': f'{base_url}/teams/',
-        'activities': f'{base_url}/activities/',
-        'leaderboard': f'{base_url}/leaderboard/',
-        'workouts': f'{base_url}/workouts/',
-    })
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', api_root, name='api-root'),
+    path('', RedirectView.as_view(url='/api/', permanent=False)),
     path('api/', include(router.urls)),
 ]
